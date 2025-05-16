@@ -98,8 +98,40 @@ services:
         tty: true
         restart: "no"
 
+    cassandra:
+        image: cassandra:4.1
+        container_name: cassandra
+        networks:
+            - proj-network
+        ports:
+            - "9042:9042"
+        environment:
+            - CASSANDRA_CLUSTER_NAME=wiki-cluster
+            - CASSANDRA_DC=dc1
+            - CASSANDRA_ENDPOINT_SNITCH=GossipingPropertyFileSnitch
+        volumes:
+            - cassandra_data:/var/lib/cassandra
+        healthcheck:
+            test: ["CMD", "cqlsh", "-e", "describe keyspaces"]
+            interval: 30s
+            timeout: 10s
+            retries: 5
+
+    cassandra-init:
+        image: cassandra:4.1
+        depends_on:
+            cassandra:
+                condition: service_healthy
+        networks:
+            - proj-network
+        volumes:
+            - ./cassandra:/cql
+        entrypoint: [ "sh", "-c", "sleep 30 && cqlsh cassandra -f /cql/init.cql" ]
+
+
 networks:
     proj-network:
         name: proj-network
 volumes:
     kafka_data:
+    cassandra_data:
