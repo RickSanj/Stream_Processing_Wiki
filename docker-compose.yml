@@ -140,6 +140,21 @@ services:
             - ./cassandra:/cql
         entrypoint: ["sh", "-c", "sleep 30 && cqlsh cassandra -f /cql/init.cql"]
 
+    api:
+        build:
+            context: .
+            dockerfile: Dockerfile.api
+        container_name: api
+        ports:
+            - "8000:8000"
+        depends_on:
+            cassandra:
+                condition: service_healthy
+        networks:
+            - proj-network
+        restart: on-failure
+
+
 networks:
     proj-network:
         name: proj-network

@@ -1,4 +1,5 @@
-CREATE KEYSPACE IF NOT EXISTS wiki_analytics
+DROP KEYSPACE IF EXISTS wiki_analytics
+CREATE KEYSPACE wiki_analytics
 WITH replication = {'class': 'SimpleStrategy', 'replication_factor': 1};
 
 USE wiki_analytics;
@@ -11,7 +12,9 @@ CREATE TABLE IF NOT EXISTS domain (
     PRIMARY KEY ((domain), time)
 );
 
-CREATE TABLE IF NOT EXISTS hour (
+DROP TABLE IF EXISTS hour;
+
+CREATE TABLE hour (
     time timestamp,        
     domain text,                 
     page_id int,           
@@ -35,10 +38,12 @@ CREATE TABLE IF NOT EXISTS page_by_id (
     PRIMARY KEY (page_id)
 );
 
-CREATE TABLE IF NOT EXISTS hourly_domain_stats (
+DROP TABLE IF EXISTS hourly_domain_stats;
+
+CREATE TABLE hourly_domain_stats (
     time_start timestamp,
     time_end timestamp,
-    statistics map<text, int>,
     bots_only boolean,
-    PRIMARY KEY (time_start, time_end)
+    statistics map<text, int>,
+    PRIMARY KEY ((time_start, time_end), bots_only)
 );
