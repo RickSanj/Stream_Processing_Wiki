@@ -129,7 +129,7 @@ def get_existing_domains():
 
 # 2) Return all the pages which were created by the user with a specified user_id.
 @app.get("/pages/by_user/{user_id}")
-def get_pages_by_user(user_id: str):
+def get_pages_by_user(user_id: int):
     query = "SELECT page_id, page_title, time FROM users WHERE user_id = %s ALLOW FILTERING"
     rows = session.execute(query, (user_id,))
     pages = [{"page_id": row.page_id, "page_title": row.page_title, "time": row.time} for row in rows]
@@ -139,7 +139,7 @@ def get_pages_by_user(user_id: str):
 # 3) Return the number of articles created for a specified domain.
 @app.get("/articles/count/")
 def get_article_count(domain: str = Query(...)):
-    query = "SELECT COUNT(*) FROM page_by_id WHERE domain = '%s' ALLOW FILTERING"
+    query = "SELECT COUNT(*) FROM page_by_id WHERE domain = %s ALLOW FILTERING"
     rows = session.execute(query, (domain,))
     count = list(rows)[0].count if rows else 0
     return {"domain": domain, "article_count": count}
@@ -147,7 +147,7 @@ def get_article_count(domain: str = Query(...)):
 
 # 4) Return the page with the specified page_id.
 @app.get("/pages/{page_id}")
-def get_page_by_id(page_id: str):
+def get_page_by_id(page_id: int):
     query = "SELECT page_id, page_title, domain FROM page_by_id WHERE page_id = %s"
     rows = session.execute(query, (page_id,))
     page = list(rows)
