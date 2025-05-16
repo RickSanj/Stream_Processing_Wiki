@@ -1,0 +1,5 @@
+kafka-python
+cassandra-driver
+flask
+requests
+sseclient

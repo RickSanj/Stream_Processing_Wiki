@@ -1,0 +1,59 @@
+{
+    "id": [
+        {
+            "topic": "eqiad.mediawiki.page-create",
+            "partition": 0,
+            "timestamp": 1747393468001
+        },
+        {
+            "topic": "codfw.mediawiki.page-create",
+            "partition": 0,
+            "offset": -1
+        }
+    ],
+    "data": {
+        "$schema": "/mediawiki/revision/create/2.0.0",
+        "meta": {
+            "uri": "https://commons.wikimedia.org/wiki/File:Cheval_%C3%A0_bascule-Mus%C3%A9e_alsacien_de_Strasbourg.jpg",
+            "request_id": "6240deb2-65e8-4168-bdec-6d5f6c7af08a",
+            "id": "5d76df36-d411-4666-8908-a1cdc6ad6024",
+            "dt": "2025-05-16T11:04:28Z",
+            "domain": "commons.wikimedia.org",
+            "stream": "mediawiki.page-create",
+            "topic": "eqiad.mediawiki.page-create",
+            "partition": 0,
+            "offset": 312691473
+        },
+        "database": "commonswiki",
+        "page_id": 165376551,
+        "page_title": "File:Cheval_à_bascule-Musée_alsacien_de_Strasbourg.jpg",
+        "page_namespace": 6,
+        "rev_id": 1032193074,
+        "rev_timestamp": "2025-05-16T11:04:27Z",
+        "rev_sha1": "qtzhzfycm3s3cbbmwi6xkglhn5bds27",
+        "rev_minor_edit": false,
+        "rev_len": 352,
+        "rev_content_model": "wikitext",
+        "rev_content_format": "text/x-wiki",
+        "performer": {
+            "user_text": "Ji-Elle",
+            "user_groups": ["autopatrolled", "*", "user", "autoconfirmed"],
+            "user_is_bot": false,
+            "user_id": 30885,
+            "user_registration_dt": "2006-03-03T19:06:32Z",
+            "user_edit_count": 317611
+        },
+        "page_is_redirect": false,
+        "comment": "Uploaded own work with UploadWizard",
+        "parsedcomment": "Uploaded own work with UploadWizard",
+        "dt": "2025-05-16T11:04:27Z",
+        "rev_slots": {
+            "main": {
+                "rev_slot_content_model": "wikitext",
+                "rev_slot_sha1": "qtzhzfycm3s3cbbmwi6xkglhn5bds27",
+                "rev_slot_size": 352,
+                "rev_slot_origin_rev_id": 1032193074
+            }
+        }
+    }
+}
