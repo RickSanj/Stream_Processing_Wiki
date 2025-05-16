@@ -66,15 +66,27 @@ services:
             "
 
     producer:
-        build: 
+        build:
             context: .
             dockerfile: Dockerfile.producer
         container_name: producer
         depends_on:
             kafka-server:
                 condition: service_healthy
-            # consumer:
-            #     condition: service_started
+        restart: on-failure
+        networks:
+            - proj-network
+
+    consumer:
+        build:
+            context: .
+            dockerfile: Dockerfile.consumer
+        container_name: consumer
+        depends_on:
+            cassandra:
+                condition: service_healthy
+            kafka-server:
+                condition: service_healthy
         restart: on-failure
         networks:
             - proj-network
@@ -126,8 +138,7 @@ services:
             - proj-network
         volumes:
             - ./cassandra:/cql
-        entrypoint: [ "sh", "-c", "sleep 30 && cqlsh cassandra -f /cql/init.cql" ]
-
+        entrypoint: ["sh", "-c", "sleep 30 && cqlsh cassandra -f /cql/init.cql"]
 
 networks:
     proj-network:

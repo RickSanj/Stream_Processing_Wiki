@@ -46,11 +46,10 @@ df = spark \
 df_json = df \
     .select(from_json(col("value"), schema).alias("data")) \
     .select(
-        col("data.meta.dt").alias("event_time_str"),
         to_timestamp("data.meta.dt").alias("event_time"),
         col("data.meta.domain").alias("domain"),
         col("data.performer.user_text").alias("user_name"),
-        col("data.performer.user_id").alias("user_id"),
+        coalesce(col("data.performer.user_id"), lit(0)).alias("user_id"),
         col("data.performer.user_is_bot").alias("user_is_bot"),
         col("data.page_id").alias("page_id"),
         col("data.page_title").alias("page_title")

@@ -7,17 +7,17 @@ CREATE TABLE IF NOT EXISTS domain (
     time timestamp,        
     domain text,                 
     page_id int,           
-    user_is_bot bool,         
+    user_is_bot boolean,         
     PRIMARY KEY ((domain), time)
-) WITH CLUSTERING ORDER BY (domain ASC);
+);
 
 CREATE TABLE IF NOT EXISTS hour (
     time timestamp,        
     domain text,                 
     page_id int,           
-    user_is_bot bool,               
+    user_is_bot boolean,               
     PRIMARY KEY ((time), domain)
-) WITH CLUSTERING ORDER BY (domain ASC);
+);
 
 CREATE TABLE IF NOT EXISTS users (
     user_id int,
@@ -26,19 +26,19 @@ CREATE TABLE IF NOT EXISTS users (
     page_id int,                   
     page_title text,             
     PRIMARY KEY (user_id)
-) WITH CLUSTERING ORDER BY (user_id DESC);
+);
 
 CREATE TABLE IF NOT EXISTS page_by_id (
     page_id int,                 
     page_title text,                            
     domain text,                                
-    PRIMARY KEY (page_id)                
+    PRIMARY KEY (page_id)
 );
 
-CREATE TABLE hourly_domain_stats (
+CREATE TABLE IF NOT EXISTS hourly_domain_stats (
     time_start timestamp,
     time_end timestamp,
     statistics map<text, int>,
-    is_user
+    bots_only boolean,
     PRIMARY KEY (time_start, time_end)
 );
