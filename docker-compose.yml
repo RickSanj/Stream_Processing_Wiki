@@ -78,6 +78,26 @@ services:
         restart: on-failure
         networks:
             - proj-network
+
+    spark-submit:
+        image: bitnami/spark:3
+        container_name: spark-submit
+        command: >
+            spark-submit
+            --packages org.apache.spark:spark-sql-kafka-0-10_2.12:3.2.0
+            /opt/app/process_stream.py
+        volumes:
+            - ./app:/opt/app
+        depends_on:
+            - producer
+            - spark
+            - spark-worker
+        networks:
+            - proj-network
+        stdin_open: true
+        tty: true
+        restart: "no"
+
 networks:
     proj-network:
         name: proj-network

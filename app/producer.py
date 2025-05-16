@@ -15,16 +15,16 @@ def main():
 
     client = sseclient.SSEClient(wiki_url)
 
-    print(f"Start streaming messages to topic: {topic}")
+    print(f"Start streaming messages to topic: {topic}", flush=True)
     for event in client:
         if event.event == 'message':
             try:
                 data = json.loads(event.data)
                 producer.send(topic, value=data)
                 print(
-                    f"---[{data['meta']['dt']}] Sent: {data['meta']['request_id']}")
+                    f"---[{data['meta']['dt']}] Sent: {data['meta']['request_id']}", flush=True)
             except Exception as e:
-                print(f"Skipped event: {e}")
+                print(f"Skipped event: {e}", flush=True)
 
 
 
