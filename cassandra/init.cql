@@ -6,16 +6,16 @@ USE wiki_analytics;
 CREATE TABLE IF NOT EXISTS domain (
     time timestamp,        
     domain text,                 
-    created_pages int,           
-    created_by_bots int,         
+    page_id int,           
+    user_is_bot bool,         
     PRIMARY KEY ((domain), time)
 ) WITH CLUSTERING ORDER BY (domain ASC);
 
 CREATE TABLE IF NOT EXISTS hour (
     time timestamp,        
     domain text,                 
-    created_pages int,           
-    created_by_bots int,            
+    page_id int,           
+    user_is_bot bool,               
     PRIMARY KEY ((time), domain)
 ) WITH CLUSTERING ORDER BY (domain ASC);
 
@@ -23,8 +23,8 @@ CREATE TABLE IF NOT EXISTS users (
     user_id int,
     user_name text,
     time timestamp,                 
-    created_pages int,                    
-    page_titles text,             
+    page_id int,                   
+    page_title text,             
     PRIMARY KEY (user_id)
 ) WITH CLUSTERING ORDER BY (user_id DESC);
 
@@ -39,5 +39,6 @@ CREATE TABLE hourly_domain_stats (
     time_start timestamp,
     time_end timestamp,
     statistics map<text, int>,
+    is_user
     PRIMARY KEY (time_start, time_end)
 );
