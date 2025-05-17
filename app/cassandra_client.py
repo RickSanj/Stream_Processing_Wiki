@@ -1,12 +1,7 @@
 import time
 from cassandra.cluster import Cluster
 import json
-from datetime import datetime
 
-
-def round_to_hour(dt: datetime) -> datetime:
-        """Rounds a datetime to the start of the hour (zeroes out minutes, seconds, microseconds)."""
-        return dt.replace(minute=0, second=0, microsecond=0)
 
 class CassandraClient:
     def __init__(self, host, port, keyspace):
@@ -73,15 +68,14 @@ class CassandraClient:
             VALUES (%s, %s, %s)
         """, (page_id, page_title, domain))
 
-    
+        self.session.execute("""
+            INSERT INTO domains (domain)
+            VALUES (%s)
+        """, (domain,))
 
     def insert_agg_record(self, last_hour, new_hour, map_all_users, map_bots_only):
-        last_hour = round_to_hour(last_hour)
-        new_hour = round_to_hour(new_hour)
-
-        print(f"🟢 Inserting aggregate data from {last_hour} to {new_hour}")
-        print("📊 All users stats:", map_all_users)
-        print("🤖 Bots only stats:", map_bots_only)
+        last_hour = last_hour.replace(minute=0, second=0, microsecond=0)
+        new_hour = new_hour.replace(minute=0, second=0, microsecond=0)
 
         self.session.execute("""
             INSERT INTO hourly_domain_stats (time_start, time_end, statistics, bots_only)

@@ -4,6 +4,7 @@ from datetime import datetime, timedelta
 from collections import defaultdict
 import time
 from fastapi import Query
+from fastapi.responses import JSONResponse
 
 
 app = FastAPI()
@@ -15,114 +16,104 @@ cluster = Cluster(CASSANDRA_NODES)
 session = cluster.connect()
 session.set_keyspace(CASSANDRA_KEYSPACE)
 
-def round_to_hour(dt):
-    return dt.replace(minute=0, second=0, microsecond=0)
+
 
 @app.get("/domain_statistics/")
-def get_domain_statistics():
-    now = round_to_hour(datetime.utcnow())
+def domain_statistics():
+    now = datetime.utcnow().replace(minute=0, second=0, microsecond=0)
+
     stats = []
 
     for i in range(6, 0, -1):
-        start_time = now - timedelta(hours=i)
-        end_time = start_time + timedelta(hours=1)
+        for i in range(6, 0, -1):
+            start = now - timedelta(hours=i)
+            end = start + timedelta(hours=1)
 
-        print(f"🔍 Querying stats from {start_time} to {end_time}")
-
-        query = """
+        rows = session.execute("""
             SELECT statistics FROM hourly_domain_stats
-            WHERE time_start = %s AND time_end = %s AND bots_only = false
-        """
-        rows = session.execute(query, (start_time, end_time))
-        domain_counts = []
-        for row in rows:
-            stats_dict = row.statistics
-            for domain, count in stats_dict.items():
-                domain_counts.append({domain: count})
+            WHERE time_start=%s AND time_end=%s AND bots_only=False
+        """, (start, end))
 
-        stats.append({
-            "time_start": start_time.strftime("%H:%M"),
-            "time_end": end_time.strftime("%H:%M"),
-            "statistics": domain_counts
-        })
+        row = next(iter(rows), None)
+
+        if row and row.statistics:
+            formatted_stats = [{domain: count} for domain, count in row.statistics.items()]
+            stats.append({
+                "time_start": start.strftime("%H:%M"),
+                "time_end": end.strftime("%H:%M"),
+                "statistics": formatted_stats
+            })
 
     return stats
 
 @app.get("/pages_statistics/")
-def get_pages_statistics():
-    now = round_to_hour(datetime.utcnow())
-    start_time = now - timedelta(hours=6)
-    end_time = now - timedelta(hours=1)
+def pages_created_by_bots():
+    now = datetime.utcnow().replace(minute=0, second=0, microsecond=0)
+    total_statistics = defaultdict(int)
 
-    combined_stats = defaultdict(int)
+    for i in range(6, 0, -1):
+        start = now - timedelta(hours=i)
+        end = start + timedelta(hours=1)
 
-    for i in range(6, 1, -1):
-        hour_start = now - timedelta(hours=i)
-        hour_end = hour_start + timedelta(hours=1)
-
-        print(f"🔍 Querying bot stats from {hour_start} to {hour_end}")
-
-        query = """
+        rows = session.execute("""
             SELECT statistics FROM hourly_domain_stats
-            WHERE time_start = %s AND time_end = %s AND bots_only = true
-        """
-        rows = session.execute(query, (hour_start, hour_end))
-        for row in rows:
+            WHERE time_start=%s AND time_end=%s AND bots_only=True
+        """, (start, end))
+
+        row = next(iter(rows), None)
+
+        if row and row.statistics:
             for domain, count in row.statistics.items():
-                combined_stats[domain] += count
+                total_statistics[domain] += count
 
     return {
-        "time_start": start_time.strftime("%H:%M"),
-        "time_end": end_time.strftime("%H:%M"),
+        "time_start": (now - timedelta(hours=7)).replace(minute=0, second=0, microsecond=0).strftime("%H:%M"),
+        "time_end": (now - timedelta(hours=1)).replace(minute=0, second=0, microsecond=0).strftime("%H:%M"),
         "statistics": [
             {"domain": domain, "created_by_bots": count}
-            for domain, count in combined_stats.items()
+            for domain, count in total_statistics.items()
         ]
     }
 
+
+   
+
 @app.get("/top_users/")
-def get_top_users():
+def top_users():
     now = datetime.utcnow()
-    six_hours_ago = now - timedelta(hours=6)
-    one_hour_ago = now - timedelta(hours=1)
+    start_time = (now - timedelta(hours=7)).replace(minute=0, second=0, microsecond=0)
+    end_time = (now - timedelta(hours=1)).replace(minute=0, second=0, microsecond=0)
 
-    print(f"🔍 Querying users from {six_hours_ago} to {one_hour_ago}")
+    rows = session.execute("SELECT user_id, user_name, time, page_title FROM users")
 
-    query = """
-        SELECT user_id, user_name, time, page_id, page_title FROM users
-    """
-    rows = session.execute(query)
-
-    user_data = defaultdict(lambda: {"user_name": "", "pages": []})
+    users = defaultdict(lambda: {
+        "user_name": "",
+        "page_titles": [],
+        "page_count": 0
+    })
 
     for row in rows:
-        if six_hours_ago <= row.time < one_hour_ago:
-            user_data[row.user_id]["user_name"] = row.user_name
-            user_data[row.user_id]["pages"].append(row.page_title)
+        if start_time <= row.time <= end_time:
+            users[row.user_id]["user_name"] = row.user_name
+            users[row.user_id]["page_titles"].append(row.page_title)
+            users[row.user_id]["page_count"] += 1
 
-    top_users = sorted(
-        user_data.items(),
-        key=lambda item: len(item[1]["pages"]),
-        reverse=True
-    )[:20]
+    top_users_list = sorted(users.items(), key=lambda item: item[1]["page_count"], reverse=True)[:20]
 
-    return [
-        {
-            "user_id": user_id,
-            "user_name": data["user_name"],
-            "time_start": six_hours_ago.strftime("%H:%M"),
-            "time_end": one_hour_ago.strftime("%H:%M"),
-            "pages_created": data["pages"],
-            "count": len(data["pages"])
-        }
-        for user_id, data in top_users
-    ]
+    return [{
+        "user_id": user_id,
+        "user_name": data["user_name"],
+        "time_start": start_time.strftime("%H:%M"),
+        "time_end": end_time.strftime("%H:%M"),
+        "page_titles": data["page_titles"],
+        "page_count": data["page_count"]
+    } for user_id, data in top_users_list]
+
 
 
 @app.get("/domains/")
 def get_existing_domains():
-    query = "SELECT DISTINCT domain FROM page_by_id ALLOW FILTERING"
-    rows = session.execute(query)
+    rows = session.execute("SELECT domain FROM domains")
     domains = [row.domain for row in rows]
     return {"domains": domains}
 

@@ -1,5 +1,4 @@
-DROP KEYSPACE IF EXISTS wiki_analytics
-CREATE KEYSPACE wiki_analytics
+CREATE KEYSPACE IF NOT EXISTS wiki_analytics
 WITH replication = {'class': 'SimpleStrategy', 'replication_factor': 1};
 
 USE wiki_analytics;
@@ -32,10 +31,14 @@ CREATE TABLE IF NOT EXISTS users (
 );
 
 CREATE TABLE IF NOT EXISTS page_by_id (
-    page_id int,                 
-    page_title text,                            
-    domain text,                                
-    PRIMARY KEY (page_id)
+    domain text,
+    page_id int,
+    page_title text,
+    PRIMARY KEY (domain, page_id)
+);
+
+CREATE TABLE IF NOT EXISTS domains (
+    domain text PRIMARY KEY
 );
 
 DROP TABLE IF EXISTS hourly_domain_stats;
