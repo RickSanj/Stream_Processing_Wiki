@@ -31,6 +31,9 @@ Category B and(task 3 Category A):<br>
 - Cassandra Queries are made on demand by user
 
 
+## Results
+
+See results in results/ folder
 
 ### How to run the application
 
