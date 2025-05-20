@@ -25,9 +25,8 @@ def domain_statistics():
     stats = []
 
     for i in range(6, 0, -1):
-        for i in range(6, 0, -1):
-            start = now - timedelta(hours=i)
-            end = start + timedelta(hours=1)
+        start = now - timedelta(hours=i)
+        end = start + timedelta(hours=1)
 
         rows = session.execute("""
             SELECT statistics FROM hourly_domain_stats

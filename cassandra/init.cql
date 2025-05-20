@@ -11,9 +11,7 @@ CREATE TABLE IF NOT EXISTS domain (
     PRIMARY KEY ((domain), time)
 );
 
-DROP TABLE IF EXISTS hour;
-
-CREATE TABLE hour (
+CREATE TABLE IF NOT EXISTS hour (
     time timestamp,        
     domain text,                 
     page_id int,           
@@ -41,9 +39,7 @@ CREATE TABLE IF NOT EXISTS domains (
     domain text PRIMARY KEY
 );
 
-DROP TABLE IF EXISTS hourly_domain_stats;
-
-CREATE TABLE hourly_domain_stats (
+CREATE TABLE IF NOT EXISTS hourly_domain_stats (
     time_start timestamp,
     time_end timestamp,
     bots_only boolean,

@@ -51,7 +51,7 @@ See results in results/ folder
     docker-compose up
     ```
 
-3. 
+3. **Clean up:**
     ```bash
     docker-compose down
     ```
